@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Selforio — Build Your Online Identity</title>
+<meta name="description" content="Create a personal brand that attracts opportunities. Selforio helps designers, developers and creators stand out with a site that feels professional — and you.">
+<style>
+/* ==========================================================================
+   Embedded type (subset WOFF, Latin) — works fully offline
+   ========================================================================== */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:block;src:url(assets/inter-latin.woff) format("woff-variations"),url(assets/inter-latin.woff) format("woff")}
+@font-face{font-family:"Poppins";font-style:normal;font-weight:600;font-display:block;src:url(assets/poppins-latin.woff) format("woff")}
+
+/* ==========================================================================
+   Design tokens
+   Reference frame: 1448 × 1086. Every measurement below is expressed in
+   design pixels and multiplied by --u (one design pixel on screen).
+   --u = min(vw/1448, vh/1086): the whole composition scales uniformly and the
+   reference proportions are preserved at every size.
+   ========================================================================== */
+:root{
+  --u: min(calc(100vw / 1448), calc(100dvh / 1086));
+  --black:#000;
+  --ink:#ffffff;
+  --nav-ink:#f5f8fd;
+  --sub-ink:#bcbcbe;
+  --pill-strong:#d6d8dd;
+  --pill-soft:#b9bcc3;
+  --blue:#2d6afe;
+  --blue-rim:#487dff;
+  --font-ui:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-display:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-logo:"Poppins","Inter",system-ui,sans-serif;
+}
+@supports not (height:100dvh){ :root{ --u: min(calc(100vw / 1448), calc(100vh / 1086)); } }
+
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--black);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--black);color:var(--ink);font-family:var(--font-ui);font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ==========================================================================
+   Page shell — always exactly fills the viewport (no top / bottom bands)
+   Vertical stack (design px):  nav 124.5 · hero 541.5 · planet zone 420 = 1086
+   Spare height (portrait-ish screens) is shared between a spacer above the
+   hero and the planet zone, so the scene grows instead of leaving gaps.
+   ========================================================================== */
+.page{
+  position:relative;isolation:isolate;
+  /* exactly one screen tall; grows only if the copy can't fit (tiny landscape phones) */
+  height:100vh;height:100dvh;min-height:min-content;
+  display:flex;flex-direction:column;
+  background:var(--black);
+}
+/* the only intentional overflow is the planet artwork (wider than the viewport by
+   design); it is clipped on its own layer below, never on the page */
+@supports not (overflow:clip){ .page{overflow:hidden} }
+.spacer{flex:0 0 auto;height:calc(max(0px, 100dvh - 1086 * var(--u)) * 0.24)}
+@supports not (height:100dvh){ .spacer{height:calc(max(0px, 100vh - 1086 * var(--u)) * 0.24)} }
+
+/* ---------- Planet scene (embedded asset) ---------- */
+.planet-zone{
+  position:relative;z-index:0;
+  flex:1 1 0;
+  min-height:calc(90 * var(--u));
+  container-type:size;
+  overflow-x:clip;
+  pointer-events:none;
+}
+.planet{
+  position:absolute;left:50%;bottom:0;
+  /* image row 665.5 sits on the zone's top edge and the image bottom on the viewport
+     bottom. The reference size (1086u) is kept unless the zone is squeezed by more
+     than a few design px (short landscape screens), then it follows the zone so the
+     rim always clears the logo strip. */
+  height:max(calc(100cqh * 1086 / 420.5), min(calc(1086 * var(--u)), calc(100cqh * 1086 / 420.5 + 3 * var(--u))));
+  width:auto;aspect-ratio:1448 / 1086;max-width:none;
+  transform:translateX(-50%);
+  filter:url(#tone);
+  user-select:none;-webkit-user-drag:none;
+}
+/* no container-query support: fall back to the reference size, anchored bottom */
+@supports not (height:1cqh){ .planet{height:calc(1086 * var(--u))} }
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+.nav{position:relative;z-index:5;height:calc(124.5 * var(--u));flex:none}
+.nav__row{
+  position:absolute;left:0;right:0;top:calc(34.3 * var(--u));
+  height:calc(37.7 * var(--u));
+  padding:0 calc(62 * var(--u) + env(safe-area-inset-right, 0px)) 0 calc(68 * var(--u) + env(safe-area-inset-left, 0px));
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:calc(11.05 * var(--u));transform:translateY(calc(-0.6 * var(--u)))}
+.brand__mark{width:max(18px, calc(32.6 * var(--u)));height:auto;aspect-ratio:32.6 / 31.3}
+.brand__name{font-family:var(--font-display);font-weight:550;font-size:max(15px, calc(27.8 * var(--u)));
+  letter-spacing:-0.027em;line-height:1;color:#fff;transform:translateY(calc(4.3 * var(--u)))}
+.nav__links{
+  position:absolute;left:50%;top:50%;transform:translate(calc(-50% - 2.2 * var(--u)),calc(-50% - 0.1 * var(--u)));
+  display:flex;align-items:center;gap:calc(42.6 * var(--u));
+  margin:0;padding:0;list-style:none;
+}
+.nav__links a{font-weight:600;font-size:max(13px, calc(16.25 * var(--u)));letter-spacing:0;line-height:1.2;color:var(--nav-ink);
+  transition:color .2s ease}
+.nav__links li:first-child a{display:inline-block;transform:translateX(calc(-1 * var(--u)))}
+.btn-nav{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:calc(37.7 * var(--u));min-height:32px;
+  padding:0 calc(21.6 * var(--u)) 0 calc(19.6 * var(--u));
+  border-radius:999px;background:#fff;color:#000;
+  font-weight:600;font-size:max(13px, calc(15.5 * var(--u)));letter-spacing:0;line-height:1;white-space:nowrap;
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.nav__row > .btn-nav{transform:translateY(calc(0.7 * var(--u)))}
+.menu-btn{display:none}
+.nav__links .cta-item{display:none}
+
+/* ==========================================================================
+   Hero copy
+   ========================================================================== */
+.hero{position:relative;z-index:2;flex:none;display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:0 calc(24 * var(--u))}
+
+/* Glass badge — dark navy glass, blue rim lit from the lower-left, soft white sheen top-left */
+.badge{
+  position:relative;display:inline-flex;align-items:center;margin:0 0 0 calc(-0.7 * var(--u));
+  height:calc(43.9 * var(--u));
+  padding:0 calc(27.8 * var(--u)) 0 calc(27.9 * var(--u));
+  border-radius:999px;
+  background:
+    radial-gradient(calc(40 * var(--u)) calc(24 * var(--u)) at 3% 0%, rgba(255,255,255,.07), rgba(255,255,255,0) 100%),
+    radial-gradient(calc(70 * var(--u)) calc(26 * var(--u)) at 0% 100%, rgba(0,0,0,.5), rgba(0,0,0,0) 100%),
+    linear-gradient(90deg, #1b1b1c 0%, #151516 3.5%, #0e0f11 7%, #0b0d12 10%, #080b15 16%, #050b19 24%, #050b19 100%);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  font-weight:500;font-size:max(11.5px, calc(15.62 * var(--u)));line-height:1;letter-spacing:0;white-space:nowrap;
+  color:var(--pill-soft);
+}
+/* top hairline: soft white at the left, cooling to a faint blue toward the right */
+.badge::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  padding:calc(2 * var(--u)) 0 0 calc(1.2 * var(--u));
+  background:linear-gradient(90deg, rgba(255,255,255,.12) 0%, rgba(200,215,255,.10) 8%, rgba(110,150,240,.11) 22%, rgba(80,125,235,.075) 50%, rgba(70,115,230,.045) 75%, rgba(70,115,230,.03) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+}
+/* blue rim + tight inner glow, lit from the lower-left */
+.badge::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  border:calc(1.4 * var(--u)) solid var(--blue-rim);
+  box-shadow:inset calc(1.2 * var(--u)) calc(-2.4 * var(--u)) calc(3.2 * var(--u)) rgba(72,125,255,.95);
+  -webkit-mask-image:linear-gradient(9deg, #000 13%, rgba(0,0,0,.72) 24%, rgba(0,0,0,.22) 39%, transparent 50%);
+          mask-image:linear-gradient(9deg, #000 13%, rgba(0,0,0,.72) 24%, rgba(0,0,0,.22) 39%, transparent 50%);
+}
+.badge__dot{width:calc(6.8 * var(--u));height:calc(6.8 * var(--u));border-radius:50%;background:#c9c9cb;margin-right:calc(11.4 * var(--u));flex:none}
+.badge strong{font-weight:500;color:var(--pill-strong)}
+
+.title{
+  margin:calc(38.24 * var(--u)) 0 0;
+  font-family:var(--font-display);font-weight:750;
+  font-size:calc(78.8 * var(--u));line-height:calc(81 * var(--u));letter-spacing:-0.0014em;word-spacing:0.0168em;
+  color:#fff;text-wrap:balance;position:relative;top:calc(-0.8 * var(--u));
+}
+.lead{
+  margin:calc(36.94 * var(--u)) 0 0;
+  font-weight:400;font-size:max(14px, calc(22.6 * var(--u)));line-height:max(calc(36 * var(--u)), 1.4em);letter-spacing:0.031em;word-spacing:0.0527em;
+  color:var(--sub-ink);text-wrap:pretty;
+}
+.br-lg{display:inline}
+/* each desktop headline line is a phrase group: kept whole while it fits, wraps
+   internally (balanced) when it doesn't — so no breakpoint, and no orphaned word */
+.title__line{display:block}
+
+.actions{display:flex;align-items:center;justify-content:center;gap:calc(14.1 * var(--u));position:relative;left:calc(-0.8 * var(--u));margin-top:calc(43.32 * var(--u))}
+.btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  height:calc(55.4 * var(--u));min-height:38px;border-radius:999px;
+  font-weight:470;font-size:max(14px, calc(20.62 * var(--u)));line-height:1;letter-spacing:0;white-space:nowrap;
+  transition:transform .2s ease, box-shadow .25s ease, filter .25s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn--primary{
+  padding:0 calc(21.6 * var(--u));
+  color:#eef3ff;background:var(--blue);
+  border:calc(1 * var(--u)) solid rgba(255,255,255,.42);
+  box-shadow:inset 0 calc(1 * var(--u)) 0 rgba(255,255,255,.14), inset 0 calc(-1 * var(--u)) 0 rgba(0,0,0,.06);
+}
+.btn--ghost{
+  padding:0 calc(21.9 * var(--u));
+  color:#fff;
+  border:calc(1.1 * var(--u)) solid transparent;
+  background:
+    linear-gradient(#000,#000) padding-box,
+    linear-gradient(90deg, #5d5f61 0%, #5d6066 18%, #4e5667 50%, #354463 73%, #213b74 100%) border-box;
+}
+.btn:focus-visible,.btn-nav:focus-visible,.nav__links a:focus-visible,.menu-btn:focus-visible{outline:2px solid #8fb0ff;outline-offset:3px}
+
+/* ==========================================================================
+   Logo marquee — clipped window 892 × 34 centred; first frame = reference
+   ========================================================================== */
+/* --lu: the strip's own unit = --u, with a floor that keeps logo text at >= 12px */
+.logos{--lu:max(var(--u), 0.5715px);position:relative;top:calc(-0.8 * var(--u));z-index:2;flex:none;margin-top:calc(55.3 * var(--u));height:calc(34 * var(--lu));
+  width:calc(892 * var(--lu));max-width:calc(100% - 32px);margin-inline:auto;overflow:hidden}
+.logos__track{
+  display:flex;width:max-content;height:100%;
+  transform:translateX(calc(100.5 * var(--lu) - 33.3333%));
+  animation:marquee 46s linear infinite;
+}
+@keyframes marquee{
+  from{transform:translateX(calc(100.5 * var(--lu) - 33.3333%))}
+  to{transform:translateX(calc(100.5 * var(--lu) - 66.6667%))}
+}
+.logo{display:flex;align-items:center;flex:none;height:100%;padding-right:calc(var(--gap, 45) * var(--lu));color:#fff}
+.logo svg{width:calc(34 * var(--lu));height:calc(34 * var(--lu));flex:none;margin-right:calc(var(--g, 8.5) * var(--lu))}
+.logo span{font-family:var(--font-logo);font-weight:600;font-size:calc(21 * var(--lu));line-height:1;
+  letter-spacing:calc(var(--ls, 0) * var(--lu));transform:translateY(calc(var(--ty, 0.8) * var(--lu)))}
+
+@media (hover: hover){
+  .nav__links a:hover{color:#fff}
+  .btn-nav:hover{box-shadow:0 0 0 calc(4 * var(--u)) rgba(255,255,255,.12)}
+  .btn--primary:hover{box-shadow:0 0 calc(24 * var(--u)) rgba(45,106,254,.55), inset 0 calc(1 * var(--u)) 0 rgba(255,255,255,.2)}
+  .btn--ghost:hover{filter:brightness(1.25)}
+  .logos:hover .logos__track{animation-play-state:paused}
+}
+/* Touch input: enlarge hit areas invisibly (pseudo-element) without changing visuals */
+@media (pointer: coarse){
+  .nav__links a,.btn-nav{position:relative}
+  .nav__links a::after,.btn-nav::after{content:"";position:absolute;inset:-14px -6px}
+  .btn::after{content:"";position:absolute;inset:min(0px, calc((100% - 44px) / 2)) 0}
+}
+@media (prefers-reduced-motion: reduce){
+  .logos__track{animation:none}
+}
+
+/* ==========================================================================
+   RESPONSIVE ARCHITECTURE
+   Desktop (base, above) is locked. Two further tiers, each entered only where
+   the previous one measurably stops working:
+
+   TABLET — portrait / near-square screens, aspect below 14/15.
+     Measured: past ~0.93 the desktop composition hands more than half of the
+     screen to the decorative planet while the headline drops under ~50px and the
+     subtitle sits on its 14px floor. The architecture itself (nav row, centred
+     copy, button pair, logo window, planet horizon) still works, so it is kept;
+     only the unit changes: --u is re-derived from the portrait frame so type
+     grows into the available height. The unit is continuous with desktop at the
+     14/15 boundary (1552 = 1448 / (14/15)), so there is no size jump.
+
+   MOBILE — entered from whichever wider architecture is active:
+     · from TABLET below 600px: measured, the links-to-CTA clearance in the nav
+       row drops under 24px (two 6px touch insets + 12px of visible space), and
+       the subtitle starts orphaning a word soon after (~545px).
+     · from DESKTOP below 524px (narrow landscape windows): the desktop row holds
+       longer and reaches the same 24px limit at ~522px.
+     Nav collapses to logo + menu button; the copy re-flows for a phone.
+   ========================================================================== */
+
+/* ---------- TABLET ---------- */
+@media (max-aspect-ratio: 14/15) and (min-width: 600px){
+  :root{ --u: min(calc(100vw / 1000), calc(100dvh / 1552)); }
+  @supports not (height:100dvh){ :root{ --u: min(calc(100vw / 1000), calc(100vh / 1552)); } }
+  /* fixed nav-row vertical offset and the bottom planet zone keep their desktop
+     proportions; the extra portrait height is shared above the copy */
+  .spacer{height:auto;flex:0.25 1 0}
+  .hero{padding-inline:calc(48 * var(--u) + env(safe-area-inset-left, 0px))}
+  .planet-zone{min-height:calc(300 * var(--u))}
+  /* touch-first: the eyebrow badge keeps a 12px floor (desktop floor is 11.5px) */
+  .badge{font-size:max(12px, calc(15.62 * var(--u)))}
+}
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 599.98px) and (max-aspect-ratio: 14/15), (max-width: 523.98px){
+  /* phone unit: 1 at a 430px-wide phone, shrinks with width or short height, never above 1 */
+  :root{ --m: min(calc(100vw / 430), calc(100dvh / 880), 1px); }
+  @supports not (height:100dvh){ :root{ --m: min(calc(100vw / 430), calc(100vh / 880), 1px); } }
+  .page{height:auto;min-height:100vh;min-height:100dvh}
+
+  /* header: logo + menu button; links and CTA move into the menu panel */
+  .nav{height:auto;padding:calc(max(14px, 18 * var(--m)) + env(safe-area-inset-top, 0px)) calc(max(16px, 20 * var(--m)) + env(safe-area-inset-right, 0px)) 0 calc(max(16px, 20 * var(--m)) + env(safe-area-inset-left, 0px))}
+  .nav__row{position:relative;top:0;padding:0;height:max(44px, calc(44 * var(--m)))}
+  .brand{gap:calc(8.5 * var(--m));transform:none}
+  .brand__mark{width:max(22px, calc(25 * var(--m)))}
+  .brand__name{font-size:max(19px, calc(21.5 * var(--m)));transform:none}
+  .nav__row > .btn-nav{display:none}
+  .menu-btn{
+    display:inline-flex;align-items:center;justify-content:center;flex:none;
+    width:44px;height:44px;border-radius:999px;cursor:pointer;padding:0;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .menu-btn svg{width:20px;height:20px;overflow:visible}
+  .menu-btn path{transition:transform .2s ease;transform-origin:10px 10px}
+  .nav.is-open .menu-btn .l1{transform:translateY(3.5px) rotate(45deg)}
+  .nav.is-open .menu-btn .l2{transform:translateY(-3.5px) rotate(-45deg)}
+
+  /* menu panel — same navy glass, hairline and radius family as the badge */
+  .nav__links{
+    display:flex;flex-direction:column;align-items:stretch;gap:0;
+    position:absolute;left:0;right:0;top:calc(100% + 12px);transform:translateY(-6px);
+    padding:8px;border-radius:20px;
+    background:rgba(5,11,25,.86);border:1px solid rgba(255,255,255,.1);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+    box-shadow:0 20px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    opacity:0;visibility:hidden;
+    transition:opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+  }
+  .nav.is-open .nav__links{opacity:1;visibility:visible;transform:none;transition:opacity .2s ease, transform .2s ease}
+  .nav__links li:first-child a{display:flex;transform:none}
+  .nav__links a{display:flex;align-items:center;min-height:48px;padding:0 14px;font-size:16px;border-radius:12px}
+  .nav__links a::after{content:none}
+  .nav__links .cta-item{display:block}
+  .nav__links a.btn-nav{justify-content:center;margin-top:6px;height:48px;font-size:15px;padding:0 20px;color:#000;background:#fff;border-radius:999px}
+
+  /* hero copy */
+  .spacer{height:auto;flex:0.55 1 0;min-height:calc(22 * var(--m))}
+  .hero{padding:0 calc(max(16px, 20 * var(--m)) + env(safe-area-inset-left, 0px))}
+  .badge{margin:0;height:max(32px, calc(36 * var(--m)));padding:0 calc(18 * var(--m));font-size:max(12px, calc(13 * var(--m)))}
+  .badge__dot{width:5px;height:5px;margin-right:9px}
+  .badge::before{padding:1px 0 0 1px}
+  .badge::after{border-width:1px;box-shadow:inset 1px -2px 3px rgba(72,125,255,.85)}
+  .title{top:0;margin-top:calc(22 * var(--m));font-size:max(30px, calc(44 * var(--m)));line-height:1.06;letter-spacing:-0.012em;word-spacing:0;max-width:12.5em}
+  .lead{margin-top:calc(16 * var(--m));font-size:max(14px, calc(16 * var(--m)));line-height:1.6;letter-spacing:0.01em;word-spacing:0;max-width:26em}
+  .lead .br-lg{display:none}
+
+  /* the two CTAs stay a pair; they only wrap if their labels genuinely can't fit */
+  .actions{left:0;flex-wrap:wrap;margin-top:calc(26 * var(--m));gap:10px;width:100%;max-width:max(calc(390 * var(--m)), 340px)}
+  .btn{flex:1 0 auto;height:max(46px, calc(50 * var(--m)));font-size:max(15px, calc(16 * var(--m)));padding:0 calc(16 * var(--m))}
+  .btn--primary,.btn--ghost{border-width:1px}
+
+  /* logo strip: full width with soft edges (same marquee, same first frame) */
+  .logos{--lu:max(calc(0.86 * var(--m)), 0.5715px);top:0;margin-top:calc(34 * var(--m));width:100%;max-width:none;height:calc(30 * var(--m));
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);
+            mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
+  .planet-zone{min-height:calc(200 * var(--m))}
+}
+@media (prefers-reduced-motion: reduce){
+  .nav__links,.menu-btn path{transition:none!important}
+}
+/* Desktop (locked): narrower landscape laptops keep the tighter link spacing */
+@media (min-aspect-ratio: 1001/1000) and (min-width: 641px) and (max-width: 1100px){
+  .nav__links{gap:calc(30 * var(--u))}
+}
+/* Short landscape screens (phones on their side) keep the desktop composition;
+   only the type floors relax so the hero still fits one screen */
+@media (min-width: 524px) and (min-aspect-ratio: 1001/1000) and (max-height: 560px){
+  .lead{font-size:max(12px, calc(22.6 * var(--u)))}
+  .btn{min-height:32px;font-size:max(13px, calc(20.62 * var(--u)))}
+  .btn-nav{min-height:30px;font-size:max(12px, calc(15.5 * var(--u)))}
+  .nav__links a{font-size:max(12px, calc(16.25 * var(--u)))}
+  .badge{font-size:max(10.5px, calc(15.62 * var(--u)))}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <!-- Tone match: maps the supplied planet asset onto the reference's grade -->
+  <filter id="tone" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
+    <feColorMatrix type="matrix" values="0.9273 0.0506 0.0107 0.0000 0.0004 0.0330 0.9104 0.0288 0.0000 -0.0004 0.2063 -0.2455 1.0299 0.0000 -0.0027 0.0000 0.0000 0.0000 1.0000 0.0000"/>
+  </filter>
+  <symbol id="i-catalog" viewBox="0 0 34 34"><defs><linearGradient id="gc1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9a9a9"/><stop offset="1" stop-color="#7d7d7d"/></linearGradient></defs><circle cx="17" cy="17" r="15.5" fill="url(#gc1)"/><path d="M17 1.5a15.5 15.5 0 0 1 0 31z" fill="#d2d2d2"/><circle cx="17" cy="17" r="6" fill="#efefef"/></symbol><symbol id="i-layers" viewBox="0 0 34 34"><defs><linearGradient id="gl1" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#d6d6d6"/><stop offset="1" stop-color="#c6c6c6"/></linearGradient><linearGradient id="gl2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9c9c9c"/><stop offset="1" stop-color="#939393"/></linearGradient></defs><g transform="translate(0.8 0.9)"><path d="M11.21 16.81 Q12.50 12.50 16.88 11.46 L29.12 8.54 Q33.50 7.50 32.21 11.81 L28.79 23.19 Q27.50 27.50 23.12 28.54 L10.88 31.46 Q6.50 32.50 7.79 28.19 Z" fill="url(#gl1)"/><path d="M5.21 9.81 Q6.50 5.50 10.88 4.46 L23.12 1.54 Q27.50 0.50 26.21 4.81 L22.79 16.19 Q21.50 20.50 17.12 21.54 L4.88 24.46 Q0.50 25.50 1.79 21.19 Z" fill="url(#gl2)"/></g></symbol><symbol id="i-circooles" viewBox="0 0 34 34"><g transform="translate(0 1)"><circle cx="11.6" cy="12.2" r="11.4" fill="#919191"/><circle cx="22.1" cy="21.4" r="11.7" fill="#828282" fill-opacity=".95"/><path d="M12.6 23.5a11.7 11.7 0 0 1 -1.6 -11" stroke="#9e9e9e" stroke-width="1" fill="none" opacity=".6"/></g></symbol><symbol id="i-quotient" viewBox="0 0 34 34"><g transform="translate(0 0.8)"><path fill-rule="evenodd" fill="#999" d="M16 0.9a16 16 0 1 1 0 32a16 16 0 1 1 0-32zm-0.4 7.6a8.4 8.4 0 1 0 0 16.8a8.4 8.4 0 1 0 0-16.8z"/><path d="M17.2 19.6 L22.6 15.6 L31.6 25.8 L26.4 30.2 Z" fill="#6f6f6f"/><circle cx="19.6" cy="20.4" r="4.4" fill="#cfcfcf"/><circle cx="28.3" cy="28.6" r="4" fill="#c2c2c2"/></g></symbol><symbol id="i-hourglass" viewBox="0 0 34 34"><defs><clipPath id="ch"><path d="M1.9 1.7 Q1.9 0.9 2.7 0.9 H31.3 Q32.1 0.9 32.1 1.7 V10.6 Q32.1 13.3 29.1 15.6 Q32.1 17.7 32.1 20 V31.6 Q32.1 32.4 31.3 32.4 H2.7 Q1.9 32.4 1.9 31.6 V20 Q1.9 17.7 4.9 15.6 Q1.9 13.3 1.9 10.6 Z"/></clipPath><linearGradient id="gh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfbfb"/><stop offset=".55" stop-color="#f0f0f0"/><stop offset="1" stop-color="#d3d3d3"/></linearGradient></defs><g transform="translate(0.9 0.9)"><g clip-path="url(#ch)"><rect x="0" y="0" width="34" height="34" fill="#c3c3c3"/><rect x="0" y="0" width="34" height="15.9" fill="#7f7f7f"/><ellipse cx="17" cy="15.9" rx="12.3" ry="4.6" fill="url(#gh)"/><rect x="0" y="31.4" width="34" height="1.2" fill="#6e6e6e"/></g></g></symbol>
+</svg>
+
+<div class="page">
+  <header class="nav" id="nav">
+    <nav aria-label="Primary">
+    <div class="nav__row">
+      <a class="brand" href="#" aria-label="Selforio home">
+        <svg class="brand__mark" viewBox="0 0 32.6 31.3" aria-hidden="true">
+          <path d="M3.85 0 V20.8 A6.05 6.05 0 0 0 16.15 20.8 V9.75 A6.5 6.5 0 0 1 29.15 9.75 V31.3" fill="none" stroke="#f1f1f1" stroke-width="6.45" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand__name">Selforio</span>
+      </a>
+      <ul class="nav__links" id="menu">
+        <li><a href="#">Home</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li class="cta-item"><a class="btn-nav" href="#start">Start Building</a></li>
+      </ul>
+      <a class="btn-nav" href="#start">Start Building</a>
+      <button class="menu-btn" type="button" aria-controls="menu" aria-expanded="false" aria-label="Open menu">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path class="l1" d="M3 6.5h14"/><path class="l2" d="M3 13.5h14"/></svg>
+      </button>
+    </div>
+    </nav>
+  </header>
+
+  <div class="spacer" aria-hidden="true"></div>
+
+  <main class="hero">
+    <p class="badge"><span class="badge__dot" aria-hidden="true"></span><strong>Build Your</strong>&nbsp;Online Identity Today</p>
+    <h1 class="title"><span class="title__line">Create a Personal Brand That</span> <span class="title__line">Attracts Opportunities</span></h1>
+    <p class="lead">Whether you're a designer, developer, or creator, PersonaForge helps<br class="br-lg"> you stand out with a site that feels professional, and you.</p>
+    <div class="actions">
+      <a class="btn btn--primary" href="#start">Start Building</a>
+      <a class="btn btn--ghost" href="#examples">See Examples</a>
+    </div>
+  </main>
+
+  <section class="logos" aria-label="Trusted by">
+    <div class="logos__track">
+      <div class="logo" aria-hidden="true" style="--ls:-0.05;--g:8.8;--gap:44.2"><svg aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.45;--g:8.15;--gap:44.97"><svg aria-hidden="true"><use href="#i-circooles"/></svg><span>Circooles</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.49;--g:7.42;--gap:42.5;--ty:1.8"><svg aria-hidden="true"><use href="#i-quotient"/></svg><span>Quotient</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.02;--g:6.4;--gap:43.3"><svg aria-hidden="true"><use href="#i-hourglass"/></svg><span>Hourglass</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.05;--g:8.8;--gap:44.2"><svg aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.45;--g:8.15;--gap:44.97"><svg aria-hidden="true"><use href="#i-circooles"/></svg><span>Circooles</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.49;--g:7.42;--gap:42.5;--ty:1.8"><svg aria-hidden="true"><use href="#i-quotient"/></svg><span>Quotient</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.02;--g:6.4;--gap:43.3"><svg aria-hidden="true"><use href="#i-hourglass"/></svg><span>Hourglass</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0;--g:8.5;--gap:44.0"><svg aria-hidden="true"><use href="#i-catalog"/></svg><span>Catalog</span></div>
+      <div class="logo" style="--ls:-0.05;--g:8.8;--gap:44.2"><svg aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></div>
+      <div class="logo" style="--ls:-0.45;--g:8.15;--gap:44.97"><svg aria-hidden="true"><use href="#i-circooles"/></svg><span>Circooles</span></div>
+      <div class="logo" style="--ls:0.49;--g:7.42;--gap:42.5;--ty:1.8"><svg aria-hidden="true"><use href="#i-quotient"/></svg><span>Quotient</span></div>
+      <div class="logo" style="--ls:0.02;--g:6.4;--gap:43.3"><svg aria-hidden="true"><use href="#i-hourglass"/></svg><span>Hourglass</span></div>
+      <div class="logo" style="--ls:-0.05;--g:8.8;--gap:44.2"><svg aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></div>
+      <div class="logo" style="--ls:-0.45;--g:8.15;--gap:44.97"><svg aria-hidden="true"><use href="#i-circooles"/></svg><span>Circooles</span></div>
+      <div class="logo" style="--ls:0.49;--g:7.42;--gap:42.5;--ty:1.8"><svg aria-hidden="true"><use href="#i-quotient"/></svg><span>Quotient</span></div>
+      <div class="logo" style="--ls:0.02;--g:6.4;--gap:43.3"><svg aria-hidden="true"><use href="#i-hourglass"/></svg><span>Hourglass</span></div>
+      <div class="logo" style="--ls:0;--g:8.5;--gap:44.0"><svg aria-hidden="true"><use href="#i-catalog"/></svg><span>Catalog</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.05;--g:8.8;--gap:44.2"><svg aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.45;--g:8.15;--gap:44.97"><svg aria-hidden="true"><use href="#i-circooles"/></svg><span>Circooles</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.49;--g:7.42;--gap:42.5;--ty:1.8"><svg aria-hidden="true"><use href="#i-quotient"/></svg><span>Quotient</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.02;--g:6.4;--gap:43.3"><svg aria-hidden="true"><use href="#i-hourglass"/></svg><span>Hourglass</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.05;--g:8.8;--gap:44.2"><svg aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:-0.45;--g:8.15;--gap:44.97"><svg aria-hidden="true"><use href="#i-circooles"/></svg><span>Circooles</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.49;--g:7.42;--gap:42.5;--ty:1.8"><svg aria-hidden="true"><use href="#i-quotient"/></svg><span>Quotient</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0.02;--g:6.4;--gap:43.3"><svg aria-hidden="true"><use href="#i-hourglass"/></svg><span>Hourglass</span></div>
+      <div class="logo" aria-hidden="true" style="--ls:0;--g:8.5;--gap:44.0"><svg aria-hidden="true"><use href="#i-catalog"/></svg><span>Catalog</span></div>
+    </div>
+  </section>
+
+  <div class="planet-zone" aria-hidden="true">
+    <img class="planet" alt="" decoding="async" fetchpriority="high" src="assets/planet.webp">
+  </div>
+</div>
+
+<script>
+/* Mobile menu: disclosure pattern. CSS decides when the button exists;
+   JS only manages state, focus and dismissal. */
+(function(){
+  var nav=document.getElementById('nav'), btn=nav.querySelector('.menu-btn'), menu=document.getElementById('menu');
+  var mobile=matchMedia('(max-width: 599.98px) and (max-aspect-ratio: 14/15), (max-width: 523.98px)');
+  function set(open, returnFocus){
+    nav.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open);
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    if(open){ var first=menu.querySelector('a'); if(first) setTimeout(function(){ first.focus({preventScroll:true}); }, 30); }
+    else if(returnFocus){ btn.focus(); }
+  }
+  btn.addEventListener('click', function(){ set(!nav.classList.contains('is-open'), false); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && nav.classList.contains('is-open')) set(false, true); });
+  document.addEventListener('pointerdown', function(e){ if(nav.classList.contains('is-open') && !nav.contains(e.target)) set(false, false); });
+  menu.addEventListener('click', function(e){ if(e.target.closest('a') && mobile.matches) set(false, false); });
+  mobile.addEventListener('change', function(m){ if(!m.matches) set(false, false); });
+})();
+</script>
+
+</body>
+</html>
