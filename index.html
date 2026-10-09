@@ -6,6 +6,15 @@
 <meta name="theme-color" content="#000000">
 <title>Selforio — Build Your Online Identity</title>
 <meta name="description" content="Create a personal brand that attracts opportunities. Selforio helps designers, developers and creators stand out with a site that feels professional — and you.">
+<link rel="preload" href="assets/inter-latin.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/poppins-latin.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/planet.webp" as="image" type="image/webp" fetchpriority="high">
+<script>
+/* Set the entrance state before the page paints; without JavaScript the page stays visible. */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.classList.add('has-entrance');
+}
+</script>
 <style>
 /* ==========================================================================
    Embedded type (subset WOFF, Latin) — works fully offline
@@ -201,7 +210,7 @@ img,svg{display:block}
 .btn:focus-visible,.btn-nav:focus-visible,.nav__links a:focus-visible,.menu-btn:focus-visible{outline:2px solid #8fb0ff;outline-offset:3px}
 
 /* ==========================================================================
-   Logo marquee — clipped window 892 × 34 centred; first frame = reference
+   Trust logos — clipped window 892 × 34 centred
    ========================================================================== */
 /* --lu: the strip's own unit = --u, with a floor that keeps logo text at >= 12px */
 .logos{--lu:max(var(--u), 0.5715px);position:relative;top:calc(-0.8 * var(--u));z-index:2;flex:none;margin-top:calc(55.3 * var(--u));height:calc(34 * var(--lu));
@@ -209,11 +218,6 @@ img,svg{display:block}
 .logos__track{
   display:flex;width:max-content;height:100%;
   transform:translateX(calc(100.5 * var(--lu) - 33.3333%));
-  animation:marquee 46s linear infinite;
-}
-@keyframes marquee{
-  from{transform:translateX(calc(100.5 * var(--lu) - 33.3333%))}
-  to{transform:translateX(calc(100.5 * var(--lu) - 66.6667%))}
 }
 .logo{display:flex;align-items:center;flex:none;height:100%;padding-right:calc(var(--gap, 45) * var(--lu));color:#fff}
 .logo svg{width:calc(34 * var(--lu));height:calc(34 * var(--lu));flex:none;margin-right:calc(var(--g, 8.5) * var(--lu))}
@@ -225,7 +229,6 @@ img,svg{display:block}
   .btn-nav:hover{box-shadow:0 0 0 calc(4 * var(--u)) rgba(255,255,255,.12)}
   .btn--primary:hover{box-shadow:0 0 calc(24 * var(--u)) rgba(45,106,254,.55), inset 0 calc(1 * var(--u)) 0 rgba(255,255,255,.2)}
   .btn--ghost:hover{filter:brightness(1.25)}
-  .logos:hover .logos__track{animation-play-state:paused}
 }
 /* Touch input: enlarge hit areas invisibly (pseudo-element) without changing visuals */
 @media (pointer: coarse){
@@ -233,10 +236,6 @@ img,svg{display:block}
   .nav__links a::after,.btn-nav::after{content:"";position:absolute;inset:-14px -6px}
   .btn::after{content:"";position:absolute;inset:min(0px, calc((100% - 44px) / 2)) 0}
 }
-@media (prefers-reduced-motion: reduce){
-  .logos__track{animation:none}
-}
-
 /* ==========================================================================
    RESPONSIVE ARCHITECTURE
    Desktop (base, above) is locked. Two further tiers, each entered only where
@@ -333,7 +332,7 @@ img,svg{display:block}
   .btn{flex:1 0 auto;height:max(46px, calc(50 * var(--m)));font-size:max(15px, calc(16 * var(--m)));padding:0 calc(16 * var(--m))}
   .btn--primary,.btn--ghost{border-width:1px}
 
-  /* logo strip: full width with soft edges (same marquee, same first frame) */
+  /* logo strip: full width with soft edges, fixed at its reference position */
   .logos{--lu:max(calc(0.86 * var(--m)), 0.5715px);top:0;margin-top:calc(34 * var(--m));width:100%;max-width:none;height:calc(30 * var(--m));
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);
             mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
@@ -354,6 +353,40 @@ img,svg{display:block}
   .btn-nav{min-height:30px;font-size:max(12px, calc(15.5 * var(--u)))}
   .nav__links a{font-size:max(12px, calc(16.25 * var(--u)))}
   .badge{font-size:max(10.5px, calc(15.62 * var(--u)))}
+}
+
+/* One finite opening sequence. The planet and page background never animate.
+   Each delay is placed on the same 1.95s score; the final frame uses the
+   existing layout and all entrance styles are removed after completion. */
+@keyframes entrance-quiet{
+  from{opacity:0;translate:0 8px}
+  to{opacity:1;translate:0 0}
+}
+@keyframes entrance-title{
+  from{opacity:0;clip-path:inset(0 0 100% 0);translate:0 .2em}
+  to{opacity:1;clip-path:inset(0);translate:0 0}
+}
+@keyframes entrance-trust{
+  from{opacity:0;clip-path:inset(0 100% 0 0)}
+  to{opacity:1;clip-path:inset(0)}
+}
+.has-entrance .brand{animation:entrance-quiet .62s cubic-bezier(.22,1,.36,1) .08s both}
+.has-entrance .nav__row > .btn-nav{animation:entrance-quiet .55s cubic-bezier(.22,1,.36,1) .25s both}
+.has-entrance .menu-btn{animation:entrance-quiet .55s cubic-bezier(.22,1,.36,1) .2s both}
+@media (min-width:600px), (min-width:524px) and (min-aspect-ratio:14/15){
+  .has-entrance .nav__links{animation:entrance-quiet .55s cubic-bezier(.22,1,.36,1) .18s both}
+}
+.has-entrance .badge{animation:entrance-quiet .62s cubic-bezier(.22,1,.36,1) .24s both}
+.has-entrance .title__line{animation:entrance-title .82s cubic-bezier(.16,1,.3,1) .39s both}
+.has-entrance .title__line + .title__line{animation-delay:.55s}
+.has-entrance .lead{animation:entrance-quiet .65s cubic-bezier(.22,1,.36,1) .88s both}
+.has-entrance .actions .btn{animation:entrance-quiet .58s cubic-bezier(.22,1,.36,1) 1.04s both}
+.has-entrance .actions .btn + .btn{animation-delay:1.13s}
+.has-entrance .logos{animation:entrance-trust .65s cubic-bezier(.22,1,.36,1) 1.3s both}
+@media (prefers-reduced-motion:reduce){
+  .has-entrance .brand,.has-entrance .nav__row > .btn-nav,.has-entrance .menu-btn,
+  .has-entrance .nav__links,.has-entrance .badge,.has-entrance .title__line,
+  .has-entrance .lead,.has-entrance .actions .btn,.has-entrance .logos{animation:none!important}
 }
 </style>
 </head>
@@ -458,6 +491,22 @@ img,svg{display:block}
   document.addEventListener('pointerdown', function(e){ if(nav.classList.contains('is-open') && !nav.contains(e.target)) set(false, false); });
   menu.addEventListener('click', function(e){ if(e.target.closest('a') && mobile.matches) set(false, false); });
   mobile.addEventListener('change', function(m){ if(!m.matches) set(false, false); });
+})();
+</script>
+<script>
+/* The entrance has one end: remove its class and all animation declarations. */
+(function(){
+  var root=document.documentElement;
+  if(!root.classList.contains('has-entrance')) return;
+  var last=document.querySelector('.logos');
+  var fallback=setTimeout(finish,2600);
+  function finish(){
+    clearTimeout(fallback);
+    last.removeEventListener('animationend',onEnd);
+    root.classList.remove('has-entrance');
+  }
+  function onEnd(event){if(event.animationName==='entrance-trust') finish();}
+  last.addEventListener('animationend',onEnd);
 })();
 </script>
 
