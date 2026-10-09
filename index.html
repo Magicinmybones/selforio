@@ -210,7 +210,7 @@ img,svg{display:block}
 .btn:focus-visible,.btn-nav:focus-visible,.nav__links a:focus-visible,.menu-btn:focus-visible{outline:2px solid #8fb0ff;outline-offset:3px}
 
 /* ==========================================================================
-   Trust logos — clipped window 892 × 34 centred
+   Logo marquee — clipped window 892 × 34 centred; first frame = reference
    ========================================================================== */
 /* --lu: the strip's own unit = --u, with a floor that keeps logo text at >= 12px */
 .logos{--lu:max(var(--u), 0.5715px);position:relative;top:calc(-0.8 * var(--u));z-index:2;flex:none;margin-top:calc(55.3 * var(--u));height:calc(34 * var(--lu));
@@ -218,6 +218,11 @@ img,svg{display:block}
 .logos__track{
   display:flex;width:max-content;height:100%;
   transform:translateX(calc(100.5 * var(--lu) - 33.3333%));
+  animation:marquee 46s linear infinite;
+}
+@keyframes marquee{
+  from{transform:translateX(calc(100.5 * var(--lu) - 33.3333%))}
+  to{transform:translateX(calc(100.5 * var(--lu) - 66.6667%))}
 }
 .logo{display:flex;align-items:center;flex:none;height:100%;padding-right:calc(var(--gap, 45) * var(--lu));color:#fff}
 .logo svg{width:calc(34 * var(--lu));height:calc(34 * var(--lu));flex:none;margin-right:calc(var(--g, 8.5) * var(--lu))}
@@ -229,12 +234,16 @@ img,svg{display:block}
   .btn-nav:hover{box-shadow:0 0 0 calc(4 * var(--u)) rgba(255,255,255,.12)}
   .btn--primary:hover{box-shadow:0 0 calc(24 * var(--u)) rgba(45,106,254,.55), inset 0 calc(1 * var(--u)) 0 rgba(255,255,255,.2)}
   .btn--ghost:hover{filter:brightness(1.25)}
+  .logos:hover .logos__track{animation-play-state:paused}
 }
 /* Touch input: enlarge hit areas invisibly (pseudo-element) without changing visuals */
 @media (pointer: coarse){
   .nav__links a,.btn-nav{position:relative}
   .nav__links a::after,.btn-nav::after{content:"";position:absolute;inset:-14px -6px}
   .btn::after{content:"";position:absolute;inset:min(0px, calc((100% - 44px) / 2)) 0}
+}
+@media (prefers-reduced-motion: reduce){
+  .logos__track{animation:none}
 }
 /* ==========================================================================
    RESPONSIVE ARCHITECTURE
@@ -332,7 +341,7 @@ img,svg{display:block}
   .btn{flex:1 0 auto;height:max(46px, calc(50 * var(--m)));font-size:max(15px, calc(16 * var(--m)));padding:0 calc(16 * var(--m))}
   .btn--primary,.btn--ghost{border-width:1px}
 
-  /* logo strip: full width with soft edges, fixed at its reference position */
+  /* logo strip: full width with soft edges (same marquee, same first frame) */
   .logos{--lu:max(calc(0.86 * var(--m)), 0.5715px);top:0;margin-top:calc(34 * var(--m));width:100%;max-width:none;height:calc(30 * var(--m));
     -webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);
             mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)}
@@ -356,8 +365,8 @@ img,svg{display:block}
 }
 
 /* One finite opening sequence. The planet and page background never animate.
-   Each delay is placed on the same 1.95s score; the final frame uses the
-   existing layout and all entrance styles are removed after completion. */
+   Each delay is placed on the same 1.95s score; entrance styles are removed
+   after completion while the original logo marquee continues. */
 @keyframes entrance-quiet{
   from{opacity:0;translate:0 8px}
   to{opacity:1;translate:0 0}
